@@ -1,3 +1,6 @@
+"""
+This code is from fhaghighi's repository https://github.com/fhaghighi/DiRA/blob/main/segmentation_models_pytorch/encoders/resnet.py
+"""
 """ Each encoder should have following attributes and methods and be inherited from `_base.EncoderMixin`
 
 Attributes:
