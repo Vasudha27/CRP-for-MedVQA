@@ -10,7 +10,6 @@ import utils
 import pandas as pd
 import os
 import json
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
 answer_types = ['CLOSED', 'OPEN', 'ALL']
 quesntion_types = ['Organ', 'Color', 'Shape', 'Quantity', 'Position', 'Modality', 'Abnormality', 'Plane', 'KG', 'Size']
@@ -137,11 +136,6 @@ def get_answer(p):
 
 # Logit computation (for train, test or evaluate)
 def get_result(model, dataloader, device, args):
-    N = len(dataloader.dataset)
-    M = dataloader.dataset.num_ans_candidates
-    pred_label = torch.IntTensor(N).zero_()
-    actual_label = torch.IntTensor(N).zero_()
-    idx=0
     keys = ['count', 'real', 'true', 'real_percent', 'score', 'score_percent']
     question_types_result = dict((i, dict((j, dict((k, 0.0) for k in keys)) for j in quesntion_types)) for i in answer_types)
     result = dict((i, dict((j, 0.0) for j in keys)) for i in answer_types)
@@ -172,22 +166,6 @@ def get_result(model, dataloader, device, args):
             final_preds = preds
             batch_score = compute_score_with_logits(final_preds, a.data).sum()
 
-            # saving the predictions
-            pred_label[idx:idx+batch_size] = get_answer(final_preds.data[0])
-            #print('final preds: {}, a: {}'.format(final_preds.data[0], a.data[0]))
-            #print('final preds: {}, a: {}'.format(final_preds.data[0].max(0), a.data[0].max(0)))
-            _, loc = a.data[0].max(0)
-            actual_label[idx:idx+batch_size] = loc
-            idx += batch_size
-
-            # saving the predictions
-            pred_label[idx:idx+batch_size] = get_answer(final_preds.data[0])
-            #print('final preds: {}, a: {}'.format(final_preds.data[0], a.data[0]))
-            #print('final preds: {}, a: {}'.format(final_preds.data[0].max(0), a.data[0].max(0)))
-            _, loc = a.data[0].max(0)
-            actual_label[idx:idx+batch_size] = loc
-            idx += batch_size
-
             # Compute accuracy for each type answer
             result[ans_type[0]]['count'] += 1.0
             result[ans_type[0]]['true'] += float(batch_score)
@@ -215,7 +193,7 @@ def get_result(model, dataloader, device, args):
                     question_types_result[i][j]['score_percent'] = round(question_types_result[i][j]['score']*100, 1)
                 if question_types_result[i][j]['real'] != 0.0:
                     question_types_result[i][j]['real_percent'] = round(question_types_result[i][j]['real']/question_types_result[i][j]['count']*100.0, 1)
-    return result, question_types_result, pred_label, actual_label
+    return result, question_types_result
 
 # Test phase
 if __name__ == '__main__':
@@ -254,7 +232,7 @@ if __name__ == '__main__':
         if not os.path.exists(args.output):
             os.makedirs(args.output)
         if args.use_SLAKE:
-            result, quesntion_types_result, pred_label, actual_label = get_result(model, eval_loader, args.device, args)
+            result, quesntion_types_result = get_result(model, eval_loader, args.device, args)
             print(args.input)
             if len(args.input.split('/'))==2:
                 outfile_path = args.output + '/' + args.input.split('/')[1]
@@ -267,15 +245,5 @@ if __name__ == '__main__':
             print(quesntion_types_result)
             json.dump(result, open(outfile, 'w'))
             save_questiontype_results(outfile_path, quesntion_types_result)
-            # Compute metrics
-            accuracy = accuracy_score(actual_label, pred_label)
-            precision = precision_score(actual_label, pred_label, average='macro')
-            recall = recall_score(actual_label, pred_label, average='macro')
-            f1 = f1_score(actual_label, pred_label, average='macro')
-            # Print results
-            print(f'Accuracy: {accuracy:.4f}')
-            print(f'Precision: {precision:.4f}')
-            print(f'Recall: {recall:.4f}')
-            print(f'F1 Score: {f1:.4f}')
         return
     process(args, model, eval_loader)
