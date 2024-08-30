@@ -123,11 +123,11 @@ def parse_args():
                         help='the maml_model_path we use')
     # DiR pretraining
     # image encoder
-    parser.add_argument('--dir', action='store_true', default=False, help='DiR pretraining used')
-    parser.add_argument('--weight', type=str, default='roco_128_200_r34_di_best_checkpoint.pth', help='path to pretrained weights')
-    parser.add_argument('--weights', type=str, default='dira', help='specify the weights applicable else specify imagenet')
+    parser.add_argument('--dir', action='store_true', default=False, help='contrastive restorative pretraining used')
+    parser.add_argument('--weight', type=str, default='roco_128_200_r34_di_best_checkpoint.pth', help='path to pretrained weights in case of CR Pretraining')
+    parser.add_argument('--weights', type=str, default='dir', help='specify the weights applicable. options include: random_init, imagenet, dir')
     parser.add_argument('--freeze_img_encoder', action='store_true', default=False, help='Freeze Image encoder')
-    parser.add_argument('--layer',default=9,type=int, help='layer to freeze till')
+    parser.add_argument('--layer',default=11,type=int, help='layer to freeze till')
     parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet50', help='model architecture:(default:resnet50)')
 
     # Return args
