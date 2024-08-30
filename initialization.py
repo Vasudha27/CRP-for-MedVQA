@@ -1,3 +1,6 @@
+"""
+This code is from fhaghighi's repository https://github.com/fhaghighi/DiRA/blob/main/segmentation_models_pytorch/base/initialization.py
+"""
 import torch.nn as nn
 
 def initialize_encoder(module):
