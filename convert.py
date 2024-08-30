@@ -1,3 +1,6 @@
+"""
+This code is developed based on haifan gong's repository (https://github.com/haifangong/CMSA-MTPT-4-MedicalVQA)
+"""
 import torch
 import torch.nn as nn
 import torchvision.models as models 
